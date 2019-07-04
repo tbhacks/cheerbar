@@ -4,6 +4,7 @@ trap "exit" INT
 
 URL="http://api.thingspeak.com/channels/1417/field/2/last.txt"
 
+OLDCOLOUR=""
 while true; do
 	# Get cheerlights colour
 	HEXCOLOUR=$(curl "$URL" 2> /dev/null)
@@ -14,16 +15,13 @@ while true; do
 		exit 1
 	fi
 
-	# Extract RGB converting from hexadecimal.
-	RED="${HEXCOLOUR:1:2}"
-	RED=$(( 16#$RED ))
+	if [[ ! $HEXCOLOUR == $OLDCOLOUR ]]; then
+		echo "Setting Light Bar to $HEXCOLOUR"
+		OLDCOLOUR=$HEXCOLOUR
+		
+		# FIXME Currently requires sudo to set colour
+		sudo ./barset.sh $HEXCOLOUR
+	fi
 
-	GREEN="${HEXCOLOUR:3:2}"
-	GREEN=$(( 16#$GREEN ))
-
-	BLUE="${HEXCOLOUR:5:2}"
-	BLUE=$(( 16#$BLUE ))
-
-	echo "$RED $GREEN $BLUE"
 	sleep 10
 done
